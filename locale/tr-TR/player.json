@@ -1,0 +1,6 @@
+{
+  "now_playing": {
+    "generic": "Şu anda çalan **{title}**",
+    "timestamp_entry": "Şu anda çalan **{sub_entry}** ({index}{ordinal}) \"{title}\"den"
+  }
+}
