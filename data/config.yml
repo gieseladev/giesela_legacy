@@ -1,0 +1,98 @@
+# This is the configuration file for the entirety of Giesela.
+# Keys you need to set are marked with REQUIRED, if you don't set them
+# Giesela won't start.
+
+# You may set all of these values in environment variables using two underscores for namespaces (ex: tokens__discord=TOKEN).
+# If you prefer you can also use uppercase (TOKENS__DISCORD) instead, the case doesn't matter. The environment variable's value will be treated as YAML!
+# So you can get real funky and use something like TOKENS={"discord": TOKEN} (this is equal to TOKENS__DISCORD=TOKEN)
+# The environment variables take precedence over the content of this file.
+
+# Removing something from this file doesn't "unset" the config. The "real" defaults are part of the code.
+# This file merely reflects these defaults (and overwrites them).
+
+tokens:
+  discord: "" #                                   REQUIRED
+  google_api: "" #                                REQUIRED
+
+redis:
+  uri: "" #                                       REQUIRED
+  database: 0
+  # prefixes used to distinguish stuff
+  namespaces:
+    config: "config"
+    queue: "queue"
+    persist: "persist"
+    permissions: "perms"
+
+mongodb:
+  uri: "" #                                       REQUIRED
+  database: "Giesela"
+  collections:
+    config: "config"
+    permissions: "perm"
+
+lavalink:
+  # list of lavalink nodes to use
+  nodes:
+  # whether to use wss/https
+  - secure: false
+    region: global
+    address: "" #                                 REQUIRED
+    password: "" #                                REQUIRED
+
+webiesela:
+  # if you don't want to run webiesela, set to false
+  start: true
+  port: 30000
+
+gitils:
+  url: https://gitils.giesela.io
+  token: "" #                                     REQUIRED (not yet but soon enough I guess)
+
+files:
+  data: "data"
+  # these are relative to data (unless absolute)
+  permissions: "permissions.yml"
+  radio_stations: "radio_stations.yml"
+  playlists: "playlists/playlists"
+  certificates: "cert/"
+
+misc:
+  # custom search engine id to use for image search. (This particular cse is optimised for finding images and you shouldn't have to change it)
+  image_cx: "002017775112634544492:t0ynfpg8y0e"
+
+# defaults for cross-guild configuration. These settings can be changed during runtime.
+# If a runtime setting is changed during runtime the new value is persisted in the database.
+# Values from the database obviously take precedence over the values in here.
+runtime:
+  misc:
+    # May use formatting using {<name>} where <name> may be "active_players", "guilds", "players" (hopefully self-explanatory)
+    idle_game: Waiting for someone to queue something
+
+  # defaults for guild configs. Every guild can freely adjust these settings, but as long as they don't change a value
+  # it uses these values.
+  guild:
+    commands:
+      prefix: "!"
+      # prefix to be used in sub menus, SHOULD NOT be the same as prefix!
+      menu_prefix: ""
+      # amount of seconds to wait after command before deleting all involved messages (set to 0 to disable)
+      message_decay: 30
+
+    player:
+      # volume percentage to start with (1 is 100%)
+      volume: 1
+      # max value one can set. Setting this to more than Lavalink's max volume (which is 10) will probably break things
+      max_volume: 2
+      # pause when alone in channel
+      auto_pause: true
+      # seconds to wait before disconnecting when alone in channel, set to 0 if you don't want Giesela to ever disconnect
+      auto_disconnect: 20
+
+      # the amount of seconds after which the "revert" button restarts the current entry instead of going back in history.
+      # This behaviour can be disabled by setting it to null (~)
+      restart_entry_point: 3
+
+      # limits for queue and history (0 or empty for infinite)
+      queue_limit: ~
+      history_limit: 200

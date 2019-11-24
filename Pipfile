@@ -1,0 +1,32 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+"discord.py" = {file = "https://github.com/GieselaDev/discord.py/archive/rewrite.zip"}
+imgurpython = {file = "https://github.com/Imgur/imgurpython/archive/master.zip"}
+"beautifulsoup4" = "*"
+pillow = "*"
+pynacl = "*"
+aiohttp = "*"
+websockets = "*"
+colorlog = "*"
+lxml = "*"
+pyyaml = "*"
+uvloop = {version = "*", markers = "sys_platform != 'win32'"}
+python-rapidjson = "*"
+motor = "*"
+dnspython = "*"
+aioredis = "*"
+sentry-sdk = "*"
+
+[dev-packages]
+pytest = "*"
+pytest-asyncio = "*"
+
+[requires]
+python_version = "3.7"
+
+[scripts]
+tests = "python -m pytest"

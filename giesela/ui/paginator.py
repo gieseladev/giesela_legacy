@@ -1,0 +1,91 @@
+from typing import Iterable, List, Mapping, Optional, Union
+
+from discord import Embed
+
+from . import ui_utils
+from .ui_utils import EmbedLimits
+
+
+class EmbedPaginator:
+    """
+    Keyword Args:
+        template: Embed to use as a template
+        special_template: Embed or Dict[int, Embed]. Former will be used for the first embed and the latter
+            will be used for a given index
+        fields_per_embed: Amount of fields before using a new embed
+    """
+    template: Embed
+    fields_per_page: int
+
+    _embed: Embed
+    _embeds: List[Embed]
+
+    def __init__(self, *,
+                 template: Embed = None,
+                 special_template: Union[Embed, Mapping[int, Embed]] = None,
+                 fields_per_embed: int = None) -> None:
+        self.template = template or Embed()
+        if isinstance(special_template, Embed):
+            self._first_embed = special_template
+        elif isinstance(special_template, dict):
+            self._special_template_map = special_template
+
+        self.fields_per_page = fields_per_embed if fields_per_embed is not None else EmbedLimits.FIELDS_LIMIT
+        if not 0 < self.fields_per_page <= EmbedLimits.FIELDS_LIMIT:
+            raise ValueError(f"Fields per page must be between 1 and {EmbedLimits.FIELDS_LIMIT}")
+
+        self._embeds = []
+
+    def __str__(self) -> str:
+        return f"<EmbedPaginator>"
+
+    def __len__(self) -> int:
+        return len(self._embeds)
+
+    def __iter__(self) -> Iterable[Embed]:
+        return iter(self._embeds)
+
+    def __getitem__(self, item: int) -> Embed:
+        return self._embeds[item]
+
+    @property
+    def embeds(self) -> List[Embed]:
+        return self._embeds
+
+    @property
+    def current_embed(self) -> Optional[Embed]:
+        if self._embeds:
+            return self._embeds[-1]
+        return None
+
+    def _add_embed(self) -> Embed:
+        number = len(self)
+
+        template = None
+        if number == 0:
+            template = getattr(self, "_first_embed", None)
+
+        if not template and hasattr(self, "_special_template_map"):
+            template = self._special_template_map.get(number)
+
+        template = template or self.template
+        embed = ui_utils.copy_embed(template)
+        self._embeds.append(embed)
+        return embed
+
+    def add_field(self, name: str, value: str, inline: bool = False):
+        embed = self.current_embed
+        if not embed:
+            embed = self._add_embed()
+
+        if len(name) > EmbedLimits.FIELD_NAME_LIMIT:
+            raise ValueError(f"Field name mustn't be longer than {EmbedLimits.FIELD_NAME_LIMIT} characters")
+        if len(value) > EmbedLimits.FIELD_VALUE_LIMIT:
+            raise ValueError(f"Field value mustn't be longer than {EmbedLimits.FIELD_VALUE_LIMIT} characters")
+
+        count = ui_utils.count_embed_chars(embed) + len(name) + len(value)
+
+        if len(embed.fields) >= self.fields_per_page or count > EmbedLimits.CHAR_LIMIT:
+            embed = self._add_embed()
+
+        embed.add_field(name=name, value=value, inline=inline)

@@ -1,0 +1,71 @@
+version: 2.1
+
+references:
+  chown_pipenv_cache: &chown_pipenv_cache
+    run:
+      name: Changing owner of python packages to circleci
+      command: |
+        sudo chown -R circleci:circleci /usr/local/bin
+        sudo chown -R circleci:circleci /usr/local/lib/python3.7/site-packages
+  restore_pipenv_cache: &restore_pipenv_cache
+    restore_cache:
+      key: deps-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+  install_pipenv_cache: &install_pipenv_cache
+    run:
+      name: Installing dependencies
+      command: |
+        sudo pip install pipenv
+        pipenv install --dev
+
+
+orbs:
+  docker-publish: circleci/docker-publish@0.1.6
+
+executors:
+  python:
+    docker:
+      - image: circleci/python:3.7
+
+jobs:
+  install:
+    executor: python
+    steps:
+      - checkout
+      - *chown_pipenv_cache
+      - *restore_pipenv_cache
+      - *install_pipenv_cache
+      - save_cache:
+          key: deps-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          paths:
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.7/site-packages"
+
+  tests:
+    executor: python
+    steps:
+      - checkout
+      - *chown_pipenv_cache
+      - *restore_pipenv_cache
+      - *install_pipenv_cache
+      - run:
+          name: Running tests
+          command: pipenv run tests --junitxml=test-reports/junit.xml
+      - store_test_results:
+          path: test-reports
+
+workflows:
+  main:
+    jobs:
+      - install
+
+      - tests:
+          requires:
+            - install
+
+      - docker-publish/publish:
+          image: "giesela/${CIRCLE_PROJECT_REPONAME}"
+          tag: edge
+
+          requires:
+            - tests

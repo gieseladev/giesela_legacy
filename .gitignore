@@ -1,0 +1,15 @@
+.idea/
+.pytest_cache/
+.mypy_cache/
+
+data/cert/
+data/playlists/
+logs/
+venv/
+
+data/websocket_token.bin
+.env
+
+*.pyc
+*.key
+*.crt
